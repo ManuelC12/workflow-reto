@@ -1,0 +1,38 @@
+name: Push Branch Validator
+
+on:
+  push:
+    branches-ignore:
+      - 'main'
+      - 'master'
+
+jobs:
+  validate-branch:
+    if: startsWith(github.ref, 'refs/heads/')
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Check Branch Prefix
+        shell: bash
+        run: |
+         # Obtener nombre de la rama. github.ref_name existe; si no, usamos fallback.
+         BRANCH="${{ github.ref_name || github.ref }}"
+         # Si github.ref nos da refs/heads/..., extraemos solo la parte final
+
+         if [[ "$BRANCH" == refs/* ]]; then
+          BRANCH="${BRANCH#refs/heads/}"
+         fi
+
+         echo "Branch pushing: '$BRANCH'"
+
+         # Patrón: debe comenzar con feature/ o bugfix/ o hotfix/
+         if echo "$BRANCH" | grep -Eq '^(feature|bugfix|hotfix)/'; then
+           echo "✅ Branch name OK: $BRANCH"
+         else
+           # Mensaje de error que aparecerá en los logs y marcará el job como fallido
+           echo "::error::El nombre de la rama '$BRANCH' NO cumple la convención. Usa feature/..., bugfix/... o hotfix/..."
+           exit 1
+         fi
