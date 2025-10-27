@@ -18,6 +18,7 @@ jobs:
       - name: Check Branch Prefix
         shell: bash
         run: |
+         # Comentario para ejecutar el job XD
          # Obtener nombre de la rama. github.ref_name existe; si no, usamos fallback.
          BRANCH="${{ github.ref_name || github.ref }}"
          # Si github.ref nos da refs/heads/..., extraemos solo la parte final
